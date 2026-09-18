@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BazarFitness — Compara precios de equipamiento de gimnasio</title>
+<meta name="description" content="Compara precios de equipamiento de gimnasio entre las mejores marcas y descubre cuánto cuesta montar tu gym, con propuestas a medida por metros cuadrados o presupuesto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#ff5a36;
+    --text:#161616;
+    --muted:#6a6a6a;
+    --border:#ececec;
+    --bg:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);font-family:'Poppins',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:'Poppins',sans-serif;cursor:pointer;}
+  input, select{font-family:'Poppins',sans-serif;}
+  ::placeholder{color:#9a9a9a;}
+  .wrap{max-width:1080px;margin:0 auto;width:100%;}
+
+  /* HEADER */
+  header{width:100%;box-sizing:border-box;padding:20px 64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:10;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-badge{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;}
+  .logo-text{font-size:19px;font-weight:700;letter-spacing:-0.3px;}
+  nav{display:flex;align-items:center;gap:36px;}
+  nav a{font-size:14px;font-weight:500;color:#4a4a4a;}
+  .btn-outline{padding:10px 20px;border-radius:8px;border:1.5px solid var(--text);background:#fff;font-size:14px;font-weight:600;color:var(--text);}
+  .btn-accent{padding:12px 18px;border-radius:9px;border:none;background:var(--accent);color:#fff;font-size:13.5px;font-weight:700;white-space:nowrap;}
+
+  /* HERO */
+  .hero{width:100%;box-sizing:border-box;padding:72px 24px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;}
+  .badge{padding:6px 14px;border-radius:100px;background:#fdf1ec;color:var(--accent);font-size:13px;font-weight:600;}
+  .hero h1{margin:0;font-size:44px;line-height:1.12;font-weight:800;letter-spacing:-1.2px;max-width:720px;}
+  .hero p{margin:0;font-size:17px;line-height:1.6;color:var(--muted);max-width:560px;}
+  .brands{display:flex;align-items:center;gap:24px;margin-top:6px;opacity:.55;flex-wrap:wrap;justify-content:center;}
+  .brands span{font-size:12.5px;font-weight:600;letter-spacing:.5px;}
+
+  /* KPI + TOP VENTAS */
+  .stats-section{padding:0 24px 56px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .kpi-grid{width:100%;max-width:1080px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;}
+  .kpi-card{background:#111214;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:8px;}
+  .kpi-label{font-size:12px;font-weight:600;color:#9a9a9a;}
+  .kpi-value-row{display:flex;align-items:baseline;gap:8px;}
+  .kpi-value{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.6px;}
+  .kpi-trend{font-size:12px;font-weight:700;color:#4ade80;}
+  .kpi-sub{font-size:12px;font-weight:600;color:#9a9a9a;}
+
+  .topventas{width:100%;max-width:1080px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:24px 26px;}
+  .topventas-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+  .topventas-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;}
+  .topventas-title span.sub{font-size:13px;color:#9a9a9a;font-weight:500;}
+  .pill-accent{font-size:12px;font-weight:600;color:var(--accent);padding:5px 10px;background:#fdf1ec;border-radius:100px;}
+  .rank-row{display:flex;align-items:center;gap:14px;padding:8px 0;}
+  .rank-num{width:20px;font-size:13px;font-weight:800;color:#c2c2c2;}
+  .rank-brand{width:130px;font-size:13.5px;font-weight:700;flex-shrink:0;}
+  .rank-bar-bg{flex:1;height:9px;background:#f3f3f3;border-radius:100px;overflow:hidden;}
+  .rank-bar-fill{height:100%;border-radius:100px;}
+  .rank-share{width:44px;text-align:right;font-size:13.5px;font-weight:700;}
+
+  /* NOVEDADES */
+  .novedades{padding:0 24px 56px;display:flex;flex-direction:column;align-items:center;}
+  .novedades .wrap{display:flex;flex-direction:column;}
+  .novedades h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.4px;}
+  .novedades-sub{font-size:13px;color:#9a9a9a;font-weight:500;}
+  .chips{display:flex;gap:8px;margin:16px 0 20px;flex-wrap:wrap;}
+  .chip{padding:9px 16px;border-radius:100px;border:1.5px solid #e2e2e2;background:#fff;color:#3a3a3a;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .chip.active{border:none;background:var(--accent);color:#fff;}
+  .arrivals-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+  .arrival-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;position:relative;}
+  .new-badge{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:100px;background:#eafbef;color:#158a3f;}
+  .thumb{width:100%;height:90px;border-radius:10px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .arrival-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+
+  /* COMPARADOR */
+  .comparador{padding:0 24px 64px;display:flex;flex-direction:column;align-items:center;gap:28px;}
+  .filters{width:100%;max-width:1080px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 50px -24px rgba(20,20,20,.14);padding:20px 24px;display:flex;align-items:end;gap:14px;flex-wrap:wrap;}
+  .field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:150px;}
+  .field label{font-size:12px;font-weight:600;color:#8a8a8a;}
+  .field select, .field input{padding:11px 12px;border-radius:9px;border:1.5px solid #e2e2e2;font-size:14.5px;color:var(--text);background:#fff;}
+
+  .results-count{padding:0 4px 10px;font-size:14px;color:var(--muted);}
+  .product-card{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;margin-bottom:12px;}
+  .product-card.best{border-color:var(--accent);}
+  .product-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .product-info{flex:1.4;min-width:180px;}
+  .product-brand-row{display:flex;align-items:center;gap:8px;}
+  .product-brand{font-size:15px;font-weight:700;}
+  .grade-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;}
+  .grade-pro{background:#eef2ff;color:#3b4fd9;}
+  .grade-semi{background:#fff7e6;color:#b3760a;}
+  .product-model{font-size:13px;color:#7a7a7a;}
+  .rating-row{display:flex;align-items:center;gap:5px;margin-top:4px;}
+  .stars-filled{font-size:12px;letter-spacing:1px;color:#f5a623;}
+  .stars-empty{font-size:12px;letter-spacing:1px;color:#dcdcdc;margin-left:-3px;}
+  .rating-num{font-size:12px;font-weight:600;color:#3a3a3a;}
+  .reviews-count{font-size:12px;color:#9a9a9a;}
+  .delivery-col{flex:1;min-width:110px;}
+  .delivery-label{font-size:11px;font-weight:600;color:#9a9a9a;text-transform:uppercase;letter-spacing:.4px;}
+  .delivery-val{font-size:13.5px;font-weight:600;color:#3a3a3a;}
+  .best-price-tag{display:inline-block;padding:3px 9px;border-radius:100px;background:#eafbef;color:#158a3f;font-size:11px;font-weight:700;}
+  .price-col{flex:1;min-width:120px;text-align:right;}
+  .price-val{font-size:21px;font-weight:800;}
+  .trend-val{font-size:11.5px;font-weight:700;color:#4ade80;}
+  .specs-row{display:flex;align-items:center;gap:28px;padding-top:12px;border-top:1px solid #f2f2f2;flex-wrap:wrap;}
+  .spec-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#6a6a6a;}
+  .spec-item strong{color:var(--text);font-weight:600;}
+  .btn-generic{align-self:center;margin-top:10px;padding:13px 26px;border-radius:10px;border:1.5px solid var(--text);background:#fff;color:var(--text);font-size:14px;font-weight:600;}
+
+  /* CALCULADORA */
+  .calc-divider-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 24px 32px;}
+  .calc-divider-line{width:100%;max-width:1080px;border-top:1px solid #eeeeee;}
+  .calc-eyebrow{margin-top:28px;font-size:13px;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;}
+  .calc-title{margin:2px 0 0;font-size:26px;font-weight:700;letter-spacing:-.5px;text-align:center;}
+  .calc-section{padding:0 24px 76px;display:flex;justify-content:center;}
+  .calc-card{width:100%;max-width:760px;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:0 24px 60px -20px rgba(20,20,20,.12);overflow:hidden;}
+  .tabs{display:flex;padding:22px 22px 0;gap:8px;}
+  .tab-btn{flex:1;padding:14px 0;border-radius:12px 12px 0 0;border:none;font-size:14.5px;font-weight:600;background:#f5f5f5;color:#8a8a8a;}
+  .tab-btn.active{background:#fff;color:var(--text);}
+  .calc-body{padding:32px;}
+  .calc-mode{display:none;flex-direction:column;gap:18px;}
+  .calc-mode.active{display:flex;}
+  .calc-row{display:flex;gap:16px;flex-wrap:wrap;}
+  .calc-field{flex:1;display:flex;flex-direction:column;gap:8px;min-width:180px;}
+  .calc-field label{font-size:13px;font-weight:600;color:#3a3a3a;}
+  .calc-field input,.calc-field select{padding:13px 14px;border-radius:10px;border:1.5px solid #e2e2e2;font-size:15px;color:var(--text);background:#fff;}
+  .calc-submit{margin-top:6px;padding:15px 0;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:700;}
+
+  /* FOOTER */
+  footer{width:100%;box-sizing:border-box;padding:28px 64px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);flex-wrap:wrap;gap:8px;}
+  footer span{font-size:13px;color:#8a8a8a;}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,20,20,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{width:100%;max-width:440px;background:#fff;border-radius:18px;padding:30px 30px 26px;position:relative;box-shadow:0 30px 80px -20px rgba(0,0,0,.35);}
+  .modal-close{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;border:none;background:#f2f2f2;font-size:15px;color:#4a4a4a;}
+  .modal-eyebrow{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;}
+  .modal-title{margin:6px 0 4px;font-size:20px;font-weight:700;}
+  .modal-desc{margin:0 0 20px;font-size:13.5px;color:var(--muted);line-height:1.5;}
+  .modal-form{display:flex;flex-direction:column;gap:12px;}
+  .modal-row{display:flex;gap:10px;}
+  .modal-field{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .modal-field label{font-size:12px;font-weight:600;color:#3a3a3a;}
+  .modal-field input,.modal-field select{padding:11px 12px;border-radius:9px;border:1.5px solid #e2e2e2;font-size:14px;}
+  .modal-submit{margin-top:6px;padding:14px 0;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14.5px;font-weight:700;}
+
+  @media (max-width:900px){
+    header,.hero,.stats-section,.novedades,.comparador,.calc-section,footer{padding-left:20px;padding-right:20px;}
+    .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .arrivals-grid{grid-template-columns:1fr;}
+    nav a{display:none;}
+    .product-row{align-items:flex-start;}
+    .price-col{text-align:left;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-badge">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12H5M19 12H22M6 8V16M18 8V16M6 12H18" stroke="white" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </div>
+    <span class="logo-text">BazarFitness</span>
+  </div>
+  <nav>
+    <a href="#comparador">Marcas</a>
+    <a href="#calculadora">Cómo funciona</a>
+    <a href="#novedades">Opiniones</a>
+    <button class="btn-outline">Soy distribuidor</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="badge">Comparador oficial de equipamiento para gimnasios en España</div>
+  <h1>Descubre cuánto cuesta montar tu gimnasio</h1>
+  <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos.</p>
+  <div class="brands">
+    <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Comparativas este mes</span>
+      <div class="kpi-value-row"><span class="kpi-value">1.240</span><span class="kpi-trend">▲ 18%</span></div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Marca más elegida</span>
+      <div class="kpi-value-row"><span class="kpi-value">38%</span><span class="kpi-sub">Panatta</span></div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Ahorro medio conseguido</span>
+      <div class="kpi-value-row"><span class="kpi-value">312 €</span><span class="kpi-trend">▲ 6%</span></div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Valoración media</span>
+      <div class="kpi-value-row"><span class="kpi-value">4.6</span><span style="font-size:14px;color:#f5a623;">★★★★★</span></div>
+    </div>
+  </div>
+
+  <div class="topventas">
+    <div class="topventas-head">
+      <div class="topventas-title">🔥 Top ventas esta semana <span class="sub">— Extensión de cuádriceps</span></div>
+      <span class="pill-accent">Más popular</span>
+    </div>
+    <div id="topSellersList"></div>
+  </div>
+</section>
+
+<section class="novedades" id="novedades">
+  <div class="wrap">
+    <div style="display:flex;align-items:baseline;gap:10px;">
+      <h2>Novedades por grupo muscular</h2>
+      <span class="novedades-sub">Máquinas incorporadas al catálogo recientemente</span>
+    </div>
+    <div class="chips" id="muscleChips"></div>
+    <div class="arrivals-grid" id="arrivalsGrid"></div>
+  </div>
+</section>
+
+<section class="comparador" id="comparador">
+  <div class="filters wrap">
+    <div class="field">
+      <label>Tipo de máquina</label>
+      <select><option>Extensión de cuádriceps</option><option>Prensa de piernas</option><option>Jalón al pecho</option><option>Remo sentado</option></select>
+    </div>
+    <div class="field">
+      <label>Marca</label>
+      <select><option>Todas</option><option>Matrix</option><option>Panatta</option><option>Life Fitness</option><option>Binom Fitness</option></select>
+    </div>
+    <div class="field">
+      <label>Gama</label>
+      <select><option>Todas</option><option>Profesional</option><option>Semiprofesional</option></select>
+    </div>
+    <div class="field">
+      <label>Ordenar por</label>
+      <select><option>Precio: menor a mayor</option><option>Precio: mayor a menor</option><option>Entrega más rápida</option></select>
+    </div>
+    <button class="btn-accent">Comparar</button>
+  </div>
+
+  <div class="wrap">
+    <div class="results-count">4 resultados para <strong style="color:var(--text);">Extensión de cuádriceps</strong></div>
+    <div id="productsList"></div>
+    <button class="btn-generic" onclick="openModal('cualquiera de estas máquinas')">Obtener descuento en cualquiera de estas máquinas</button>
+  </div>
+</section>
+
+<div class="calc-divider-wrap">
+  <div class="calc-divider-line"></div>
+  <span class="calc-eyebrow">¿Vas a montar el gimnasio entero?</span>
+  <h2 class="calc-title">Usa la calculadora por metros o por presupuesto</h2>
+</div>
+
+<section class="calc-section" id="calculadora">
+  <div class="calc-card">
+    <div class="tabs">
+      <button class="tab-btn active" id="tabSpace" onclick="selectMode('space')">Por metros cuadrados</button>
+      <button class="tab-btn" id="tabBudget" onclick="selectMode('budget')">Por presupuesto</button>
+    </div>
+    <div class="calc-body">
+      <div class="calc-mode active" id="modeSpace">
+        <div class="calc-row">
+          <div class="calc-field"><label>Superficie del local (m²)</label><input type="number" placeholder="Ej. 150"></div>
+          <div class="calc-field"><label>Tipo de gimnasio</label>
+            <select><option>Funcional / crossfit</option><option>Pesas y musculación</option><option>Mixto (cardio + fuerza)</option><option>Boutique / estudio</option></select>
+          </div>
+        </div>
+        <button class="calc-submit">Calcular equipamiento recomendado</button>
+      </div>
+      <div class="calc-mode" id="modeBudget">
+        <div class="calc-row">
+          <div class="calc-field"><label>Presupuesto disponible (€)</label><input type="number" placeholder="Ej. 25.000"></div>
+          <div class="calc-field"><label>Tipo de gimnasio</label>
+            <select><option>Funcional / crossfit</option><option>Pesas y musculación</option><option>Mixto (cardio + fuerza)</option><option>Boutique / estudio</option></select>
+          </div>
+        </div>
+        <div class="calc-field"><label>Metros cuadrados disponibles (opcional)</label><input type="number" placeholder="Ej. 120"></div>
+        <button class="calc-submit">Ver propuesta para mi presupuesto</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 BazarFitness — precios orientativos, sujetos a confirmación del distribuidor.</span>
+  <span>Matrix · Panatta · Life Fitness · Binom Fitness · Akon · Etenon</span>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-eyebrow">Obtener descuento</div>
+    <h3 class="modal-title" id="modalTitle">Extensión de cuádriceps</h3>
+    <p class="modal-desc">Déjanos tus datos y te enviamos el precio con descuento en menos de 24h.</p>
+    <form class="modal-form" onsubmit="return submitLead(event)">
+      <div class="modal-row">
+        <div class="modal-field"><label>Nombre</label><input type="text" placeholder="Alejandro" required></div>
+        <div class="modal-field"><label>Apellidos</label><input type="text" placeholder="García" required></div>
+      </div>
+      <div class="modal-field"><label>Teléfono</label><input type="tel" placeholder="+34 600 000 000" required></div>
+      <div class="modal-field"><label>Correo</label><input type="email" placeholder="tu@email.com" required></div>
+      <div class="modal-field"><label>Eres...</label>
+        <select><option>Gimnasio / negocio</option><option>Particular</option></select>
+      </div>
+      <button type="submit" class="modal-submit">Enviar y recibir descuento</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ---------- DATOS (edítalos aquí, o cárgalos desde tu Google Sheet en el futuro) ----------
+  const products = [
+    { brand:'Panatta', model:'Leg Extension FreeWeight', delivery:'3–5 semanas', price:'1.850 €', isBest:true, rating:4.8, reviewCount:24, grade:'Profesional', trend:'18%', weight:'118 kg', dimensions:'140×90×130 cm', maxUserWeight:'150 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Binom Fitness', model:'Leg Extension Pro', delivery:'5–7 semanas', price:'1.700 €', isBest:false, rating:4.2, reviewCount:11, grade:'Semiprofesional', trend:'9%', weight:'95 kg', dimensions:'130×85×125 cm', maxUserWeight:'120 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Matrix', model:'Leg Extension G7', delivery:'4–6 semanas', price:'2.100 €', isBest:false, rating:4.6, reviewCount:37, grade:'Profesional', trend:'12%', weight:'132 kg', dimensions:'145×92×135 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Life Fitness', model:'Leg Extension Signature', delivery:'6–8 semanas', price:'2.400 €', isBest:false, rating:4.9, reviewCount:19, grade:'Profesional', trend:'5%', weight:'140 kg', dimensions:'148×94×138 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' }
+  ];
+
+  const topSellers = [
+    { rank:1, brand:'Panatta', share:38 },
+    { rank:2, brand:'Matrix', share:27 },
+    { rank:3, brand:'Binom Fitness', share:21 },
+    { rank:4, brand:'Life Fitness', share:14 }
+  ];
+
+  const muscleGroups = [
+    { key:'pecho', name:'Pecho', icon:'🫀' },
+    { key:'espalda', name:'Espalda', icon:'🔙' },
+    { key:'piernas', name:'Piernas', icon:'🦵' },
+    { key:'hombro', name:'Hombro', icon:'💪' },
+    { key:'brazos', name:'Brazos', icon:'🏋️' },
+    { key:'core', name:'Core', icon:'🎯' }
+  ];
+
+  const newArrivalsByGroup = {
+    pecho: [
+      { brand:'Panatta', model:'Chest Press FreeWeight', price:'2.250 €', daysAgo:'2 días', icon:'🫀' },
+      { brand:'Matrix', model:'Chest Press Ultra G7', price:'2.480 €', daysAgo:'5 días', icon:'🫀' },
+      { brand:'Life Fitness', model:'Signature Chest Press', price:'2.690 €', daysAgo:'1 semana', icon:'🫀' }
+    ],
+    espalda: [
+      { brand:'Matrix', model:'Jalón al pecho G7', price:'2.100 €', daysAgo:'3 días', icon:'🔙' },
+      { brand:'Binom Fitness', model:'Lat Pulldown Pro', price:'1.780 €', daysAgo:'6 días', icon:'🔙' },
+      { brand:'Akon', model:'Remo sentado AK-500', price:'1.650 €', daysAgo:'1 semana', icon:'🔙' }
+    ],
+    piernas: [
+      { brand:'Panatta', model:'Prensa 45º FreeWeight', price:'3.200 €', daysAgo:'1 día', icon:'🦵' },
+      { brand:'Etenon', model:'Leg Curl ET-300', price:'1.590 €', daysAgo:'4 días', icon:'🦵' },
+      { brand:'Life Fitness', model:'Leg Extension Signature', price:'2.400 €', daysAgo:'1 semana', icon:'🦵' }
+    ],
+    hombro: [
+      { brand:'Matrix', model:'Shoulder Press G7', price:'2.050 €', daysAgo:'3 días', icon:'💪' },
+      { brand:'Akon', model:'Press militar AK-210', price:'1.480 €', daysAgo:'5 días', icon:'💪' },
+      { brand:'Panatta', model:'Lateral Raise FreeWeight', price:'1.920 €', daysAgo:'2 semanas', icon:'💪' }
+    ],
+    brazos: [
+      { brand:'Binom Fitness', model:'Bíceps/Tríceps Combo', price:'1.550 €', daysAgo:'2 días', icon:'🏋️' },
+      { brand:'Etenon', model:'Cable Crossover ET-410', price:'2.780 €', daysAgo:'1 semana', icon:'🏋️' },
+      { brand:'Matrix', model:'Triceps Extension G7', price:'1.890 €', daysAgo:'2 semanas', icon:'🏋️' }
+    ],
+    core: [
+      { brand:'Panatta', model:'Abdominal Crunch FreeWeight', price:'1.690 €', daysAgo:'4 días', icon:'🎯' },
+      { brand:'Life Fitness', model:'Torso Rotation Signature', price:'2.150 €', daysAgo:'1 semana', icon:'🎯' },
+      { brand:'Akon', model:'Rotary Torso AK-330', price:'1.420 €', daysAgo:'2 semanas', icon:'🎯' }
+    ]
+  };
+
+  const ACCENT = '#ff5a36';
+  let selectedMuscle = 'pecho';
+
+  // ---------- RENDER: top ventas ----------
+  function renderTopSellers(){
+    const el = document.getElementById('topSellersList');
+    el.innerHTML = topSellers.map(t => `
+      <div class="rank-row">
+        <span class="rank-num">${t.rank}</span>
+        <span class="rank-brand">${t.brand}</span>
+        <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${t.share}%;background:${t.rank===1?ACCENT:'#d9d9d9'};"></div></div>
+        <span class="rank-share">${t.share}%</span>
+      </div>
+    `).join('');
+  }
+
+  // ---------- RENDER: chips + novedades ----------
+  function renderMuscleChips(){
+    const el = document.getElementById('muscleChips');
+    el.innerHTML = muscleGroups.map(mg => `
+      <button class="chip ${mg.key===selectedMuscle?'active':''}" onclick="selectMuscle('${mg.key}')">
+        <span>${mg.icon}</span>${mg.name}
+      </button>
+    `).join('');
+  }
+  function renderArrivals(){
+    const el = document.getElementById('arrivalsGrid');
+    const list = newArrivalsByGroup[selectedMuscle] || [];
+    el.innerHTML = list.map(n => `
+      <div class="arrival-card">
+        <div class="new-badge">NUEVO</div>
+        <div class="thumb">${n.icon}</div>
+        <div>
+          <div style="font-size:14.5px;font-weight:700;">${n.brand}</div>
+          <div style="font-size:12.5px;color:#7a7a7a;">${n.model}</div>
+        </div>
+        <div class="arrival-price-row">
+          <span style="font-size:17px;font-weight:800;">${n.price}</span>
+          <span style="font-size:11px;color:#9a9a9a;">Hace ${n.daysAgo}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+  function selectMuscle(key){
+    selectedMuscle = key;
+    renderMuscleChips();
+    renderArrivals();
+  }
+
+  // ---------- RENDER: comparador ----------
+  function renderProducts(){
+    const el = document.getElementById('productsList');
+    el.innerHTML = products.map(p => {
+      const filled = Math.round(p.rating);
+      const stars = '★'.repeat(filled);
+      const empty = '★'.repeat(5 - filled);
+      const gradeClass = p.grade === 'Profesional' ? 'grade-pro' : 'grade-semi';
+      return `
+        <div class="product-card ${p.isBest ? 'best' : ''}">
+          <div class="product-row">
+            <div class="thumb" style="width:64px;height:64px;flex-shrink:0;"><span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span></div>
+            <div class="product-info">
+              <div class="product-brand-row">
+                <div class="product-brand">${p.brand}</div>
+                <span class="grade-badge ${gradeClass}">${p.grade}</span>
+              </div>
+              <div class="product-model">${p.model}</div>
+              <div class="rating-row">
+                <span class="stars-filled">${stars}</span><span class="stars-empty">${empty}</span>
+                <span class="rating-num">${p.rating}</span>
+                <span class="reviews-count">(${p.reviewCount} opiniones)</span>
+              </div>
+            </div>
+            <div class="delivery-col">
+              <div class="delivery-label">Entrega</div>
+              <div class="delivery-val">${p.delivery}</div>
+            </div>
+            <div style="flex:1;min-width:90px;">
+              ${p.isBest ? '<div class="best-price-tag">Mejor precio</div>' : ''}
+            </div>
+            <div class="price-col">
+              <div class="price-val">${p.price}</div>
+              <div class="trend-val">▲ ${p.trend} ventas</div>
+            </div>
+            <button class="btn-accent" onclick="openModal('${p.brand} ${p.model}')">Obtener descuento</button>
+          </div>
+          <div class="specs-row">
+            <div class="spec-item">⚖️ Peso: <strong>${p.weight}</strong></div>
+            <div class="spec-item">📐 Dimensiones: <strong>${p.dimensions}</strong></div>
+            <div class="spec-item">🏋️ Peso máx. usuario: <strong>${p.maxUserWeight}</strong></div>
+            <div class="spec-item">🎯 Uso: <strong>${p.usage}</strong></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------- CALCULADORA: tabs ----------
+  function selectMode(mode){
+    document.getElementById('tabSpace').classList.toggle('active', mode === 'space');
+    document.getElementById('tabBudget').classList.toggle('active', mode === 'budget');
+    document.getElementById('modeSpace').classList.toggle('active', mode === 'space');
+    document.getElementById('modeBudget').classList.toggle('active', mode === 'budget');
+  }
+
+  // ---------- MODAL / LEAD ----------
+  function openModal(title){
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal(){
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+  function submitLead(e){
+    e.preventDefault();
+    // TODO: aquí conectas el envío real del lead (a tu correo, a un Google Sheet, a un backend propio, etc.)
+    alert('Gracias, en breve te contactamos con tu descuento.');
+    closeModal();
+    return false;
+  }
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modalOverlay') closeModal();
+  });
+
+  // ---------- INIT ----------
+  renderTopSellers();
+  renderMuscleChips();
+  renderArrivals();
+  renderProducts();
+</script>
+
+</body>
+</html>
