@@ -235,25 +235,25 @@
   <div class="filters wrap">
     <div class="field">
       <label>Tipo de máquina</label>
-      <select><option>Extensión de cuádriceps</option><option>Prensa de piernas</option><option>Jalón al pecho</option><option>Remo sentado</option></select>
+      <select id="filterTipo" onchange="applyFilters()"><option>Extensión de cuádriceps</option><option>Prensa de piernas</option><option>Jalón al pecho</option><option>Remo sentado</option></select>
     </div>
     <div class="field">
       <label>Marca</label>
-      <select><option>Todas</option><option>Matrix</option><option>Panatta</option><option>Life Fitness</option><option>Binom Fitness</option><option>Titanium Strength</option><option>Force USA</option></select>
+      <select id="filterMarca"><option>Todas</option><option>Matrix</option><option>Panatta</option><option>Life Fitness</option><option>Binom Fitness</option><option>Titanium Strength</option><option>Force USA</option><option>Akon</option><option>Etenon</option></select>
     </div>
     <div class="field">
       <label>Gama</label>
-      <select><option>Todas</option><option>Profesional</option><option>Semiprofesional</option></select>
+      <select id="filterGama"><option>Todas</option><option>Profesional</option><option>Semiprofesional</option></select>
     </div>
     <div class="field">
       <label>Ordenar por</label>
-      <select><option>Precio: menor a mayor</option><option>Precio: mayor a menor</option><option>Entrega más rápida</option></select>
+      <select id="filterOrden"><option>Precio: menor a mayor</option><option>Precio: mayor a menor</option><option>Entrega más rápida</option></select>
     </div>
-    <button class="btn-accent">Comparar</button>
+    <button class="btn-accent" onclick="applyFilters()">Comparar</button>
   </div>
 
   <div class="wrap">
-    <div class="results-count">6 resultados para <strong style="color:var(--text);">Extensión de cuádriceps</strong></div>
+    <div class="results-count" id="resultsCount">6 resultados para <strong style="color:var(--text);">Extensión de cuádriceps</strong></div>
     <div id="productsList"></div>
     <button class="btn-generic" onclick="openModal('cualquiera de estas máquinas')">Obtener descuento en cualquiera de estas máquinas</button>
   </div>
@@ -325,14 +325,66 @@
 
 <script>
   // ---------- DATOS (edítalos aquí, o cárgalos desde tu Google Sheet en el futuro) ----------
-  const products = [
-    { brand:'Panatta', model:'Leg Extension FreeWeight', delivery:'3–5 semanas', price:'1.850 €', isBest:true, rating:4.8, reviewCount:24, grade:'Profesional', trend:'18%', weight:'118 kg', dimensions:'140×90×130 cm', maxUserWeight:'150 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Binom Fitness', model:'Leg Extension Pro', delivery:'5–7 semanas', price:'1.700 €', isBest:false, rating:5, reviewCount:41, grade:'Semiprofesional', trend:'22%', weight:'95 kg', dimensions:'130×85×125 cm', maxUserWeight:'120 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Matrix', model:'Leg Extension G7', delivery:'4–6 semanas', price:'2.100 €', isBest:false, rating:4.6, reviewCount:37, grade:'Profesional', trend:'12%', weight:'132 kg', dimensions:'145×92×135 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Life Fitness', model:'Leg Extension Signature', delivery:'6–8 semanas', price:'2.400 €', isBest:false, rating:4.9, reviewCount:19, grade:'Profesional', trend:'5%', weight:'140 kg', dimensions:'148×94×138 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Titanium Strength', model:'Leg Extension Elite', delivery:'4–6 semanas', price:'1.950 €', isBest:false, rating:2, reviewCount:6, grade:'Semiprofesional', trend:'3%', weight:'110 kg', dimensions:'135×88×128 cm', maxUserWeight:'140 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Force USA', model:'Leg Extension X-Series', delivery:'5–7 semanas', price:'2.050 €', isBest:false, rating:3, reviewCount:9, grade:'Profesional', trend:'7%', weight:'125 kg', dimensions:'142×90×132 cm', maxUserWeight:'150 kg', usage:'Aislamiento de cuádriceps, sentado' }
-  ];
+
+  // Multiplicador de precio por marca sobre Binom Fitness (referencia x1.00). Se usa aquí Y en la calculadora.
+  const BRAND_MULTIPLIERS = {
+    'Binom Fitness': 1.00,
+    'Titanium Strength': 1.12,
+    'Force USA': 1.12,
+    'Akon': 1.17,
+    'Etenon': 1.19,
+    'Panatta': 1.20,
+    'Matrix': 1.20,
+    'Life Fitness': 1.20
+  };
+
+  // Datos fijos por marca (no dependen del tipo de máquina)
+  const BRAND_INFO = {
+    'Panatta': { delivery:'3–5 semanas', rating:4.8, reviewCount:24, grade:'Profesional' },
+    'Binom Fitness': { delivery:'5–7 semanas', rating:5, reviewCount:41, grade:'Semiprofesional' },
+    'Matrix': { delivery:'4–6 semanas', rating:4.6, reviewCount:37, grade:'Profesional' },
+    'Life Fitness': { delivery:'6–8 semanas', rating:4.9, reviewCount:19, grade:'Profesional' },
+    'Titanium Strength': { delivery:'4–6 semanas', rating:2, reviewCount:6, grade:'Semiprofesional' },
+    'Force USA': { delivery:'5–7 semanas', rating:3, reviewCount:9, grade:'Profesional' },
+    'Akon': { delivery:'4–6 semanas', rating:4.3, reviewCount:14, grade:'Semiprofesional' },
+    'Etenon': { delivery:'5–7 semanas', rating:4.0, reviewCount:8, grade:'Profesional' }
+  };
+
+  function modelNameFor(brand, typeKey){
+    const short = { 'Extensión de cuádriceps':'Leg Extension', 'Prensa de piernas':'Leg Press 45º', 'Jalón al pecho':'Lat Pulldown', 'Remo sentado':'Seated Row' }[typeKey];
+    return short;
+  }
+
+  // Config base por tipo de máquina (precio y peso de referencia = Binom Fitness, x1.00)
+  const MACHINE_TYPE_CONFIG = {
+    'Extensión de cuádriceps': { basePrice:1700, baseWeight:95, dimensions:'130×85×125 cm', maxUserWeight:'140 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    'Prensa de piernas': { basePrice:2400, baseWeight:180, dimensions:'165×115×145 cm', maxUserWeight:'200 kg', usage:'Empuje de piernas en prensa inclinada 45º' },
+    'Jalón al pecho': { basePrice:1800, baseWeight:90, dimensions:'130×110×195 cm', maxUserWeight:'150 kg', usage:'Tracción dorsal, espalda y bíceps' },
+    'Remo sentado': { basePrice:1750, baseWeight:85, dimensions:'140×90×120 cm', maxUserWeight:'150 kg', usage:'Remo horizontal, espalda media' }
+  };
+
+  function roundTo(x, step){ return Math.round(x/step)*step; }
+
+  const productsByType = {};
+  Object.keys(MACHINE_TYPE_CONFIG).forEach((typeKey) => {
+    const cfg = MACHINE_TYPE_CONFIG[typeKey];
+    productsByType[typeKey] = Object.entries(BRAND_MULTIPLIERS).map(([brand, mult]) => {
+      const info = BRAND_INFO[brand];
+      return {
+        brand,
+        model: modelNameFor(brand, typeKey),
+        delivery: info.delivery,
+        price: roundTo(cfg.basePrice * mult, 50),
+        rating: info.rating,
+        reviewCount: info.reviewCount,
+        grade: info.grade,
+        weight: roundTo(cfg.baseWeight * mult, 1) + ' kg',
+        dimensions: cfg.dimensions,
+        maxUserWeight: cfg.maxUserWeight,
+        usage: cfg.usage
+      };
+    });
+  });
 
   const topSellers = [
     { rank:1, brand:'Panatta', share:28 },
@@ -343,9 +395,8 @@
     { rank:6, brand:'Force USA', share:9 }
   ];
 
-  const bestRated = products
-    .reduce((acc, p) => (acc.some(x => x.brand === p.brand) ? acc : acc.concat(p)), [])
-    .slice()
+  const bestRated = Object.entries(BRAND_INFO)
+    .map(([brand, info]) => ({ brand, rating: info.rating }))
     .sort((a, b) => b.rating - a.rating);
 
   const muscleGroups = [
@@ -457,15 +508,17 @@
   }
 
   // ---------- RENDER: comparador ----------
-  function renderProducts(){
+  function renderProducts(list){
     const el = document.getElementById('productsList');
-    el.innerHTML = products.map(p => {
+    const minPrice = Math.min(...list.map(p => p.price));
+    el.innerHTML = list.map(p => {
       const filled = Math.round(p.rating);
       const stars = '★'.repeat(filled);
       const empty = '★'.repeat(5 - filled);
       const gradeClass = p.grade === 'Profesional' ? 'grade-pro' : 'grade-semi';
+      const isBest = p.price === minPrice;
       return `
-        <div class="product-card ${p.isBest ? 'best' : ''}">
+        <div class="product-card ${isBest ? 'best' : ''}">
           <div class="product-row">
             <div class="thumb" style="width:64px;height:64px;flex-shrink:0;"><span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span></div>
             <div class="product-info">
@@ -485,11 +538,10 @@
               <div class="delivery-val">${p.delivery}</div>
             </div>
             <div style="flex:1;min-width:90px;">
-              ${p.isBest ? '<div class="best-price-tag">Mejor precio</div>' : ''}
+              ${isBest ? '<div class="best-price-tag">✓ Mejor precio</div>' : ''}
             </div>
             <div class="price-col">
-              <div class="price-val">${p.price}</div>
-              <div class="trend-val">▲ ${p.trend} ventas</div>
+              <div class="price-val">${p.price.toLocaleString('es-ES')} €</div>
             </div>
             <button class="btn-accent" onclick="openModal('${p.brand} ${p.model}')">Obtener descuento</button>
           </div>
@@ -502,6 +554,29 @@
         </div>
       `;
     }).join('');
+  }
+
+  function parseDeliveryWeeks(str){
+    const match = str.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 99;
+  }
+
+  function applyFilters(){
+    const tipo = document.getElementById('filterTipo').value;
+    const marca = document.getElementById('filterMarca').value;
+    const gama = document.getElementById('filterGama').value;
+    const orden = document.getElementById('filterOrden').value;
+
+    let list = productsByType[tipo].slice();
+    if (marca !== 'Todas') list = list.filter(p => p.brand === marca);
+    if (gama !== 'Todas') list = list.filter(p => p.grade === gama);
+
+    if (orden === 'Precio: menor a mayor') list.sort((a, b) => a.price - b.price);
+    else if (orden === 'Precio: mayor a menor') list.sort((a, b) => b.price - a.price);
+    else if (orden === 'Entrega más rápida') list.sort((a, b) => parseDeliveryWeeks(a.delivery) - parseDeliveryWeeks(b.delivery));
+
+    document.getElementById('resultsCount').innerHTML = `${list.length} resultado${list.length === 1 ? '' : 's'} para <strong style="color:var(--text);">${tipo}</strong>`;
+    renderProducts(list);
   }
 
   // ---------- CALCULADORA: tabs ----------
@@ -521,17 +596,7 @@
   // Curva "Home gym": 25 m² ≈ 7.000 € con Binom Fitness (misma forma de curva, escala distinta).
   const CALC_K_HOME = 493.0;
 
-  // Binom Fitness es la marca de referencia (x1.00). Panatta, Matrix y Life Fitness siempre ~20% más caras.
-  const BRAND_MULTIPLIERS = {
-    'Binom Fitness': 1.00,
-    'Titanium Strength': 1.12,
-    'Force USA': 1.12,
-    'Akon': 1.17,
-    'Etenon': 1.19,
-    'Panatta': 1.20,
-    'Matrix': 1.20,
-    'Life Fitness': 1.20
-  };
+  // BRAND_MULTIPLIERS ya está definido arriba, junto al catálogo — se reutiliza aquí tal cual.
 
   function basePriceForM2(m2, isHome){
     const k = isHome ? CALC_K_HOME : CALC_K;
@@ -638,7 +703,7 @@
   renderBestRated();
   renderMuscleChips();
   renderArrivals();
-  renderProducts();
+  applyFilters();
 </script>
 
 </body>
