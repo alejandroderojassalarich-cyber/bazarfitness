@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -8,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   :root{
     --accent:#ff5a36;
@@ -365,26 +367,41 @@
 
   function roundTo(x, step){ return Math.round(x/step)*step; }
 
-  const productsByType = {};
-  Object.keys(MACHINE_TYPE_CONFIG).forEach((typeKey) => {
-    const cfg = MACHINE_TYPE_CONFIG[typeKey];
-    productsByType[typeKey] = Object.entries(BRAND_MULTIPLIERS).map(([brand, mult]) => {
-      const info = BRAND_INFO[brand];
-      return {
-        brand,
-        model: modelNameFor(brand, typeKey),
-        delivery: info.delivery,
-        price: roundTo(cfg.basePrice * mult, 50),
-        rating: info.rating,
-        reviewCount: info.reviewCount,
-        grade: info.grade,
-        weight: roundTo(cfg.baseWeight * mult, 1) + ' kg',
-        dimensions: cfg.dimensions,
-        maxUserWeight: cfg.maxUserWeight,
-        usage: cfg.usage
-      };
+  // Catálogo de respaldo (por si el Google Sheet aún no está conectado o falla la carga)
+  function buildDefaultCatalog(){
+    const byType = {};
+    Object.keys(MACHINE_TYPE_CONFIG).forEach((typeKey) => {
+      const cfg = MACHINE_TYPE_CONFIG[typeKey];
+      byType[typeKey] = Object.entries(BRAND_MULTIPLIERS).map(([brand, mult]) => {
+        const info = BRAND_INFO[brand];
+        return {
+          brand,
+          model: modelNameFor(brand, typeKey),
+          delivery: info.delivery,
+          price: roundTo(cfg.basePrice * mult, 50),
+          rating: info.rating,
+          reviewCount: info.reviewCount,
+          grade: info.grade,
+          weight: roundTo(cfg.baseWeight * mult, 1) + ' kg',
+          dimensions: cfg.dimensions,
+          maxUserWeight: cfg.maxUserWeight,
+          usage: cfg.usage
+        };
+      });
     });
-  });
+    return byType;
+  }
+
+  function bestRatedFromCatalog(byType){
+    const seen = {};
+    Object.values(byType).forEach(list => list.forEach(p => {
+      if (!(p.brand in seen)) seen[p.brand] = p.rating;
+    }));
+    return Object.entries(seen).map(([brand, rating]) => ({ brand, rating })).sort((a, b) => b.rating - a.rating);
+  }
+
+  let productsByType = buildDefaultCatalog();
+  let bestRated = bestRatedFromCatalog(productsByType);
 
   const topSellers = [
     { rank:1, brand:'Panatta', share:28 },
@@ -394,10 +411,6 @@
     { rank:5, brand:'Titanium Strength', share:11 },
     { rank:6, brand:'Force USA', share:9 }
   ];
-
-  const bestRated = Object.entries(BRAND_INFO)
-    .map(([brand, info]) => ({ brand, rating: info.rating }))
-    .sort((a, b) => b.rating - a.rating);
 
   const muscleGroups = [
     { key:'pecho', name:'Pecho' },
@@ -517,16 +530,20 @@
       const empty = '★'.repeat(5 - filled);
       const gradeClass = p.grade === 'Profesional' ? 'grade-pro' : 'grade-semi';
       const isBest = p.price === minPrice;
+      const thumbContent = p.photo
+        ? `<img src="${p.photo}" alt="${p.brand} ${p.model}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+        : '<span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span>';
       return `
         <div class="product-card ${isBest ? 'best' : ''}">
           <div class="product-row">
-            <div class="thumb" style="width:64px;height:64px;flex-shrink:0;"><span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span></div>
+            <div class="thumb" style="width:64px;height:64px;flex-shrink:0;overflow:hidden;">${thumbContent}</div>
             <div class="product-info">
               <div class="product-brand-row">
                 <div class="product-brand">${p.brand}</div>
                 <span class="grade-badge ${gradeClass}">${p.grade}</span>
               </div>
               <div class="product-model">${p.model}</div>
+              ${p.badge ? `<div style="display:inline-block;margin-top:5px;padding:3px 9px;border-radius:100px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;">${p.badge}</div>` : ''}
               <div class="rating-row">
                 <span class="stars-filled">${stars}</span><span class="stars-empty">${empty}</span>
                 <span class="rating-num">${p.rating}</span>
@@ -549,6 +566,9 @@
             <div class="spec-item">Peso: <strong>${p.weight}</strong></div>
             <div class="spec-item">Dimensiones: <strong>${p.dimensions}</strong></div>
             <div class="spec-item">Peso máx. usuario: <strong>${p.maxUserWeight}</strong></div>
+            ${p.power ? `<div class="spec-item">Potencia: <strong>${p.power}</strong></div>` : ''}
+            ${p.maxSpeed ? `<div class="spec-item">Velocidad máx.: <strong>${p.maxSpeed}</strong></div>` : ''}
+            ${p.incline ? `<div class="spec-item">Inclinación: <strong>${p.incline}</strong></div>` : ''}
             <div class="spec-item">Uso: <strong>${p.usage}</strong></div>
           </div>
         </div>
@@ -651,6 +671,53 @@
     `;
   }
 
+  // ---------- CATÁLOGO DESDE GOOGLE SHEET ----------
+  // Pega aquí la URL de "Publicar en la web" en formato CSV de tu Google Sheet.
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0tUOQn2kZ4lcg_2j6Z4ZCmsJFoG2HvTiHQ8gWuReOKZMC_GXmMh0XstzcZ_KH0ah-SDGwUSoCTVGG/pub?output=csv';
+
+  function parseNumber(str){
+    return parseFloat(String(str).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+  }
+
+  async function loadCatalogFromSheet(){
+    if (!SHEET_CSV_URL || SHEET_CSV_URL === 'PEGA_AQUI_TU_URL_CSV') return null;
+    try {
+      const res = await fetch(SHEET_CSV_URL);
+      if (!res.ok) throw new Error('No se pudo leer el Sheet');
+      const text = await res.text();
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      const byType = {};
+      parsed.data.forEach(row => {
+        const tipo = (row.Tipo || '').trim();
+        if (!tipo) return;
+        if (!byType[tipo]) byType[tipo] = [];
+        byType[tipo].push({
+          brand: (row.Marca || '').trim(),
+          model: (row.Modelo || '').trim(),
+          photo: (row.Foto || '').trim(),
+          price: parseNumber(row.Precio),
+          delivery: (row.Entrega || '').trim(),
+          weight: (row.Peso || '').trim(),
+          dimensions: (row.Dimensiones || '').trim(),
+          maxUserWeight: (row.PesoMaxUsuario || '').trim(),
+          usage: (row.Uso || '').trim(),
+          grade: (row.Gama || '').trim(),
+          rating: parseNumber(row.Rating),
+          reviewCount: Math.round(parseNumber(row.Opiniones)),
+          power: (row.Potencia || '').trim(),
+          maxSpeed: (row.VelocidadMax || '').trim(),
+          incline: (row.Inclinacion || '').trim(),
+          badge: (row.Destacado || '').trim()
+        });
+      });
+      if (Object.keys(byType).length === 0) return null;
+      return byType;
+    } catch (err) {
+      console.warn('No se pudo cargar el catálogo desde el Sheet, usando el de respaldo.', err);
+      return null;
+    }
+  }
+
   // ---------- MODAL / LEAD ----------
   function openModal(title){
     document.getElementById('modalTitle').textContent = title;
@@ -698,12 +765,30 @@
     if (e.target.id === 'modalOverlay') closeModal();
   });
 
+  function populateFilterOptions(){
+    const tipoSelect = document.getElementById('filterTipo');
+    const marcaSelect = document.getElementById('filterMarca');
+    const tipos = Object.keys(productsByType);
+    const marcas = [...new Set(Object.values(productsByType).flat().map(p => p.brand))].sort();
+
+    tipoSelect.innerHTML = tipos.map(t => `<option>${t}</option>`).join('');
+    marcaSelect.innerHTML = '<option>Todas</option>' + marcas.map(m => `<option>${m}</option>`).join('');
+  }
+
   // ---------- INIT ----------
-  renderTopSellers();
-  renderBestRated();
-  renderMuscleChips();
-  renderArrivals();
-  applyFilters();
+  (async function init(){
+    const fromSheet = await loadCatalogFromSheet();
+    if (fromSheet) {
+      productsByType = fromSheet;
+      bestRated = bestRatedFromCatalog(productsByType);
+    }
+    populateFilterOptions();
+    renderTopSellers();
+    renderBestRated();
+    renderMuscleChips();
+    renderArrivals();
+    applyFilters();
+  })();
 </script>
 
 </body>
