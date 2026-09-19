@@ -165,9 +165,6 @@
 
 <header>
   <div class="logo">
-    <div class="logo-badge">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12H5M19 12H22M6 8V16M18 8V16M6 12H18" stroke="white" stroke-width="2.4" stroke-linecap="round"/></svg>
-    </div>
     <span class="logo-text">BazarFitness</span>
   </div>
   <nav>
@@ -183,7 +180,7 @@
   <h1>Descubre cuánto cuesta montar tu gimnasio</h1>
   <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos.</p>
   <div class="brands">
-    <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span>
+    <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span><span>TITANIUM STRENGTH</span><span>FORCE USA</span>
   </div>
 </section>
 
@@ -195,7 +192,7 @@
     </div>
     <div class="kpi-card">
       <span class="kpi-label">Marca más elegida</span>
-      <div class="kpi-value-row"><span class="kpi-value">38%</span><span class="kpi-sub">Panatta</span></div>
+      <div class="kpi-value-row"><span class="kpi-value">28%</span><span class="kpi-sub">Panatta</span></div>
     </div>
     <div class="kpi-card">
       <span class="kpi-label">Ahorro medio conseguido</span>
@@ -209,10 +206,17 @@
 
   <div class="topventas">
     <div class="topventas-head">
-      <div class="topventas-title">🔥 Top ventas esta semana <span class="sub">— Extensión de cuádriceps</span></div>
+      <div class="topventas-title">Top ventas esta semana <span class="sub">— Extensión de cuádriceps</span></div>
       <span class="pill-accent">Más popular</span>
     </div>
     <div id="topSellersList"></div>
+  </div>
+
+  <div class="topventas" style="margin-top:2px;">
+    <div class="topventas-head">
+      <div class="topventas-title">Mejor valoradas <span class="sub">— Extensión de cuádriceps</span></div>
+    </div>
+    <div id="bestRatedList"></div>
   </div>
 </section>
 
@@ -235,7 +239,7 @@
     </div>
     <div class="field">
       <label>Marca</label>
-      <select><option>Todas</option><option>Matrix</option><option>Panatta</option><option>Life Fitness</option><option>Binom Fitness</option></select>
+      <select><option>Todas</option><option>Matrix</option><option>Panatta</option><option>Life Fitness</option><option>Binom Fitness</option><option>Titanium Strength</option><option>Force USA</option></select>
     </div>
     <div class="field">
       <label>Gama</label>
@@ -249,7 +253,7 @@
   </div>
 
   <div class="wrap">
-    <div class="results-count">4 resultados para <strong style="color:var(--text);">Extensión de cuádriceps</strong></div>
+    <div class="results-count">6 resultados para <strong style="color:var(--text);">Extensión de cuádriceps</strong></div>
     <div id="productsList"></div>
     <button class="btn-generic" onclick="openModal('cualquiera de estas máquinas')">Obtener descuento en cualquiera de estas máquinas</button>
   </div>
@@ -322,57 +326,66 @@
   // ---------- DATOS (edítalos aquí, o cárgalos desde tu Google Sheet en el futuro) ----------
   const products = [
     { brand:'Panatta', model:'Leg Extension FreeWeight', delivery:'3–5 semanas', price:'1.850 €', isBest:true, rating:4.8, reviewCount:24, grade:'Profesional', trend:'18%', weight:'118 kg', dimensions:'140×90×130 cm', maxUserWeight:'150 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Binom Fitness', model:'Leg Extension Pro', delivery:'5–7 semanas', price:'1.700 €', isBest:false, rating:4.2, reviewCount:11, grade:'Semiprofesional', trend:'9%', weight:'95 kg', dimensions:'130×85×125 cm', maxUserWeight:'120 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Binom Fitness', model:'Leg Extension Pro', delivery:'5–7 semanas', price:'1.700 €', isBest:false, rating:5, reviewCount:41, grade:'Semiprofesional', trend:'22%', weight:'95 kg', dimensions:'130×85×125 cm', maxUserWeight:'120 kg', usage:'Aislamiento de cuádriceps, sentado' },
     { brand:'Matrix', model:'Leg Extension G7', delivery:'4–6 semanas', price:'2.100 €', isBest:false, rating:4.6, reviewCount:37, grade:'Profesional', trend:'12%', weight:'132 kg', dimensions:'145×92×135 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' },
-    { brand:'Life Fitness', model:'Leg Extension Signature', delivery:'6–8 semanas', price:'2.400 €', isBest:false, rating:4.9, reviewCount:19, grade:'Profesional', trend:'5%', weight:'140 kg', dimensions:'148×94×138 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' }
+    { brand:'Life Fitness', model:'Leg Extension Signature', delivery:'6–8 semanas', price:'2.400 €', isBest:false, rating:4.9, reviewCount:19, grade:'Profesional', trend:'5%', weight:'140 kg', dimensions:'148×94×138 cm', maxUserWeight:'160 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Titanium Strength', model:'Leg Extension Elite', delivery:'4–6 semanas', price:'1.950 €', isBest:false, rating:2, reviewCount:6, grade:'Semiprofesional', trend:'3%', weight:'110 kg', dimensions:'135×88×128 cm', maxUserWeight:'140 kg', usage:'Aislamiento de cuádriceps, sentado' },
+    { brand:'Force USA', model:'Leg Extension X-Series', delivery:'5–7 semanas', price:'2.050 €', isBest:false, rating:3, reviewCount:9, grade:'Profesional', trend:'7%', weight:'125 kg', dimensions:'142×90×132 cm', maxUserWeight:'150 kg', usage:'Aislamiento de cuádriceps, sentado' }
   ];
 
   const topSellers = [
-    { rank:1, brand:'Panatta', share:38 },
-    { rank:2, brand:'Matrix', share:27 },
-    { rank:3, brand:'Binom Fitness', share:21 },
-    { rank:4, brand:'Life Fitness', share:14 }
+    { rank:1, brand:'Panatta', share:28 },
+    { rank:2, brand:'Binom Fitness', share:22 },
+    { rank:3, brand:'Matrix', share:18 },
+    { rank:4, brand:'Life Fitness', share:12 },
+    { rank:5, brand:'Titanium Strength', share:11 },
+    { rank:6, brand:'Force USA', share:9 }
   ];
 
+  const bestRated = products
+    .reduce((acc, p) => (acc.some(x => x.brand === p.brand) ? acc : acc.concat(p)), [])
+    .slice()
+    .sort((a, b) => b.rating - a.rating);
+
   const muscleGroups = [
-    { key:'pecho', name:'Pecho', icon:'🫀' },
-    { key:'espalda', name:'Espalda', icon:'🔙' },
-    { key:'piernas', name:'Piernas', icon:'🦵' },
-    { key:'hombro', name:'Hombro', icon:'💪' },
-    { key:'brazos', name:'Brazos', icon:'🏋️' },
-    { key:'core', name:'Core', icon:'🎯' }
+    { key:'pecho', name:'Pecho' },
+    { key:'espalda', name:'Espalda' },
+    { key:'piernas', name:'Piernas' },
+    { key:'hombro', name:'Hombro' },
+    { key:'brazos', name:'Brazos' },
+    { key:'core', name:'Core' }
   ];
 
   const newArrivalsByGroup = {
     pecho: [
-      { brand:'Panatta', model:'Chest Press FreeWeight', price:'2.250 €', daysAgo:'2 días', icon:'🫀' },
-      { brand:'Matrix', model:'Chest Press Ultra G7', price:'2.480 €', daysAgo:'5 días', icon:'🫀' },
-      { brand:'Life Fitness', model:'Signature Chest Press', price:'2.690 €', daysAgo:'1 semana', icon:'🫀' }
+      { brand:'Panatta', model:'Chest Press FreeWeight', price:'2.250 €', daysAgo:'2 días' },
+      { brand:'Matrix', model:'Chest Press Ultra G7', price:'2.480 €', daysAgo:'5 días' },
+      { brand:'Life Fitness', model:'Signature Chest Press', price:'2.690 €', daysAgo:'1 semana' }
     ],
     espalda: [
-      { brand:'Matrix', model:'Jalón al pecho G7', price:'2.100 €', daysAgo:'3 días', icon:'🔙' },
-      { brand:'Binom Fitness', model:'Lat Pulldown Pro', price:'1.780 €', daysAgo:'6 días', icon:'🔙' },
-      { brand:'Akon', model:'Remo sentado AK-500', price:'1.650 €', daysAgo:'1 semana', icon:'🔙' }
+      { brand:'Matrix', model:'Jalón al pecho G7', price:'2.100 €', daysAgo:'3 días' },
+      { brand:'Binom Fitness', model:'Lat Pulldown Pro', price:'1.780 €', daysAgo:'6 días' },
+      { brand:'Akon', model:'Remo sentado AK-500', price:'1.650 €', daysAgo:'1 semana' }
     ],
     piernas: [
-      { brand:'Panatta', model:'Prensa 45º FreeWeight', price:'3.200 €', daysAgo:'1 día', icon:'🦵' },
-      { brand:'Etenon', model:'Leg Curl ET-300', price:'1.590 €', daysAgo:'4 días', icon:'🦵' },
-      { brand:'Life Fitness', model:'Leg Extension Signature', price:'2.400 €', daysAgo:'1 semana', icon:'🦵' }
+      { brand:'Panatta', model:'Prensa 45º FreeWeight', price:'3.200 €', daysAgo:'1 día' },
+      { brand:'Etenon', model:'Leg Curl ET-300', price:'1.590 €', daysAgo:'4 días' },
+      { brand:'Life Fitness', model:'Leg Extension Signature', price:'2.400 €', daysAgo:'1 semana' }
     ],
     hombro: [
-      { brand:'Matrix', model:'Shoulder Press G7', price:'2.050 €', daysAgo:'3 días', icon:'💪' },
-      { brand:'Akon', model:'Press militar AK-210', price:'1.480 €', daysAgo:'5 días', icon:'💪' },
-      { brand:'Panatta', model:'Lateral Raise FreeWeight', price:'1.920 €', daysAgo:'2 semanas', icon:'💪' }
+      { brand:'Matrix', model:'Shoulder Press G7', price:'2.050 €', daysAgo:'3 días' },
+      { brand:'Akon', model:'Press militar AK-210', price:'1.480 €', daysAgo:'5 días' },
+      { brand:'Panatta', model:'Lateral Raise FreeWeight', price:'1.920 €', daysAgo:'2 semanas' }
     ],
     brazos: [
-      { brand:'Binom Fitness', model:'Bíceps/Tríceps Combo', price:'1.550 €', daysAgo:'2 días', icon:'🏋️' },
-      { brand:'Etenon', model:'Cable Crossover ET-410', price:'2.780 €', daysAgo:'1 semana', icon:'🏋️' },
-      { brand:'Matrix', model:'Triceps Extension G7', price:'1.890 €', daysAgo:'2 semanas', icon:'🏋️' }
+      { brand:'Binom Fitness', model:'Bíceps/Tríceps Combo', price:'1.550 €', daysAgo:'2 días' },
+      { brand:'Etenon', model:'Cable Crossover ET-410', price:'2.780 €', daysAgo:'1 semana' },
+      { brand:'Matrix', model:'Triceps Extension G7', price:'1.890 €', daysAgo:'2 semanas' }
     ],
     core: [
-      { brand:'Panatta', model:'Abdominal Crunch FreeWeight', price:'1.690 €', daysAgo:'4 días', icon:'🎯' },
-      { brand:'Life Fitness', model:'Torso Rotation Signature', price:'2.150 €', daysAgo:'1 semana', icon:'🎯' },
-      { brand:'Akon', model:'Rotary Torso AK-330', price:'1.420 €', daysAgo:'2 semanas', icon:'🎯' }
+      { brand:'Panatta', model:'Abdominal Crunch FreeWeight', price:'1.690 €', daysAgo:'4 días' },
+      { brand:'Life Fitness', model:'Torso Rotation Signature', price:'2.150 €', daysAgo:'1 semana' },
+      { brand:'Akon', model:'Rotary Torso AK-330', price:'1.420 €', daysAgo:'2 semanas' }
     ]
   };
 
@@ -392,12 +405,29 @@
     `).join('');
   }
 
+  // ---------- RENDER: mejor valoradas ----------
+  function renderBestRated(){
+    const el = document.getElementById('bestRatedList');
+    el.innerHTML = bestRated.map(p => {
+      const filled = Math.round(p.rating);
+      const stars = '★'.repeat(filled);
+      const empty = '★'.repeat(5 - filled);
+      return `
+        <div class="rank-row">
+          <span class="rank-brand" style="width:170px;">${p.brand}</span>
+          <span class="stars-filled" style="letter-spacing:2px;">${stars}</span><span class="stars-empty" style="letter-spacing:2px;margin-left:-3px;">${empty}</span>
+          <span class="rank-share" style="width:auto;margin-left:auto;">${p.rating}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
   // ---------- RENDER: chips + novedades ----------
   function renderMuscleChips(){
     const el = document.getElementById('muscleChips');
     el.innerHTML = muscleGroups.map(mg => `
       <button class="chip ${mg.key===selectedMuscle?'active':''}" onclick="selectMuscle('${mg.key}')">
-        <span>${mg.icon}</span>${mg.name}
+        ${mg.name}
       </button>
     `).join('');
   }
@@ -407,7 +437,7 @@
     el.innerHTML = list.map(n => `
       <div class="arrival-card">
         <div class="new-badge">NUEVO</div>
-        <div class="thumb">${n.icon}</div>
+        <div class="thumb"><span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span></div>
         <div>
           <div style="font-size:14.5px;font-weight:700;">${n.brand}</div>
           <div style="font-size:12.5px;color:#7a7a7a;">${n.model}</div>
@@ -463,10 +493,10 @@
             <button class="btn-accent" onclick="openModal('${p.brand} ${p.model}')">Obtener descuento</button>
           </div>
           <div class="specs-row">
-            <div class="spec-item">⚖️ Peso: <strong>${p.weight}</strong></div>
-            <div class="spec-item">📐 Dimensiones: <strong>${p.dimensions}</strong></div>
-            <div class="spec-item">🏋️ Peso máx. usuario: <strong>${p.maxUserWeight}</strong></div>
-            <div class="spec-item">🎯 Uso: <strong>${p.usage}</strong></div>
+            <div class="spec-item">Peso: <strong>${p.weight}</strong></div>
+            <div class="spec-item">Dimensiones: <strong>${p.dimensions}</strong></div>
+            <div class="spec-item">Peso máx. usuario: <strong>${p.maxUserWeight}</strong></div>
+            <div class="spec-item">Uso: <strong>${p.usage}</strong></div>
           </div>
         </div>
       `;
@@ -502,6 +532,7 @@
 
   // ---------- INIT ----------
   renderTopSellers();
+  renderBestRated();
   renderMuscleChips();
   renderArrivals();
   renderProducts();
