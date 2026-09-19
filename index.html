@@ -682,7 +682,8 @@
   async function loadCatalogFromSheet(){
     if (!SHEET_CSV_URL || SHEET_CSV_URL === 'PEGA_AQUI_TU_URL_CSV') return null;
     try {
-      const res = await fetch(SHEET_CSV_URL);
+      const bustCacheUrl = SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + '_=' + Date.now();
+      const res = await fetch(bustCacheUrl, { cache: 'no-store' });
       if (!res.ok) throw new Error('No se pudo leer el Sheet');
       const text = await res.text();
       const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
