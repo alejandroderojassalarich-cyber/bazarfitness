@@ -504,7 +504,7 @@
     }
     el.innerHTML = list.map(n => {
       const thumbContent = n.photo
-        ? `<img src="${n.photo}" alt="${n.brand} ${n.model}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+        ? `<img src="${n.photo}" alt="${n.brand} ${n.model}" style="width:100%;height:100%;object-fit:contain;background:#fff;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
         : '<span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span>';
       return `
       <div class="arrival-card">
@@ -515,8 +515,8 @@
           <div style="font-size:12.5px;color:#7a7a7a;">${n.model}</div>
         </div>
         <div class="arrival-price-row">
-          <span style="font-size:17px;font-weight:800;">${n.price.toLocaleString('es-ES')} €</span>
-          <span style="font-size:11px;color:#9a9a9a;">Hace ${daysAgoLabel(n.dateAdded)}</span>
+          <span style="font-size:17px;font-weight:800;">${formatEuro(n.price)} €</span>
+          <span style="font-size:11px;color:#9a9a9a;">${daysAgoLabel(n.dateAdded) ? 'Hace ' + daysAgoLabel(n.dateAdded) : ''}</span>
         </div>
       </div>
     `;
@@ -539,7 +539,7 @@
       const gradeClass = p.grade === 'Profesional' ? 'grade-pro' : 'grade-semi';
       const isBest = p.price === minPrice;
       const thumbContent = p.photo
-        ? `<img src="${p.photo}" alt="${p.brand} ${p.model}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+        ? `<img src="${p.photo}" alt="${p.brand} ${p.model}" style="width:100%;height:100%;object-fit:contain;background:#fff;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
         : '<span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span>';
       return `
         <div class="product-card ${isBest ? 'best' : ''}">
@@ -566,7 +566,7 @@
               ${isBest ? '<div class="best-price-tag">✓ Mejor precio</div>' : ''}
             </div>
             <div class="price-col">
-              <div class="price-val">${p.price.toLocaleString('es-ES')} €</div>
+              <div class="price-val">${formatEuro(p.price)} €</div>
             </div>
             <button class="btn-accent" onclick="openModal('${p.brand} ${p.model}')">Obtener descuento</button>
           </div>
@@ -656,7 +656,7 @@
     const rows = Object.entries(BRAND_MULTIPLIERS)
       .map(([brand, mult]) => ({ brand, m2Est: Math.round(m2ForPrice(budget / mult, isHome)) }))
       .sort((a, b) => b.m2Est - a.m2Est);
-    renderCalcResults(rows, `${budget.toLocaleString('es-ES')} €`, 'budget');
+    renderCalcResults(rows, `${formatEuro(budget)} €`, 'budget');
   }
 
   function renderCalcResults(rows, inputLabel, mode){
@@ -670,7 +670,7 @@
               <span style="font-weight:700;font-size:14px;">${r.brand}</span>
               ${i === 0 ? '<span class="best-price-tag">✓ Mejor precio</span>' : ''}
             </div>
-            <span style="font-size:14px;color:var(--muted);min-width:90px;text-align:right;">${mode === 'space' ? r.price.toLocaleString('es-ES') + ' €' : '~' + r.m2Est + ' m²'}</span>
+            <span style="font-size:14px;color:var(--muted);min-width:90px;text-align:right;">${mode === 'space' ? formatEuro(r.price) + ' €' : '~' + r.m2Est + ' m²'}</span>
             <button class="btn-accent" style="padding:9px 14px;font-size:12.5px;" onclick="openModal('Propuesta ${r.brand} — ${inputLabel}')">Solicitar propuesta</button>
           </div>
         `).join('')}
@@ -682,6 +682,16 @@
   // ---------- CATÁLOGO DESDE GOOGLE SHEET ----------
   // Pega aquí la URL de "Publicar en la web" en formato CSV de tu Google Sheet.
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0tUOQn2kZ4lcg_2j6Z4ZCmsJFoG2HvTiHQ8gWuReOKZMC_GXmMh0XstzcZ_KH0ah-SDGwUSoCTVGG/pub?output=csv';
+
+  function formatEuro(num){
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    const rounded = Math.round(num * 100) / 100;
+    if (rounded % 1 === 0) {
+      return String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+    const parts = rounded.toFixed(2).split('.');
+    return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + parts[1];
+  }
 
   function parseNumber(str){
     return parseFloat(String(str).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
@@ -795,7 +805,7 @@
     const section = document.getElementById('bestSellerSection');
     if (!product) { section.innerHTML = ''; return; }
     const thumbContent = product.photo
-      ? `<img src="${product.photo}" alt="${product.brand} ${product.model}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:11px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+      ? `<img src="${product.photo}" alt="${product.brand} ${product.model}" style="width:100%;height:100%;object-fit:contain;background:#fff;border-radius:14px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:11px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
       : '<span style="font-size:11px;font-weight:600;color:#a3a3a3;">FOTO</span>';
     section.innerHTML = `
       <div class="wrap">
@@ -804,7 +814,7 @@
           <div style="flex:1;min-width:200px;">
             <span style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;">🔥 Producto más vendido del mes</span>
             <div style="font-size:20px;font-weight:800;color:#fff;margin-top:4px;">${product.brand} — ${product.model}</div>
-            <div style="font-size:14px;color:#9a9a9a;margin-top:2px;">${product.price.toLocaleString('es-ES')} € · Entrega ${product.delivery}</div>
+            <div style="font-size:14px;color:#9a9a9a;margin-top:2px;">${formatEuro(product.price)} € · Entrega ${product.delivery}</div>
           </div>
           <button class="btn-accent" onclick="openModal('${product.brand} ${product.model}')">Obtener descuento</button>
         </div>
