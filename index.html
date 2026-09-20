@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="es">
 <head>
@@ -185,6 +184,8 @@
     <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span><span>TITANIUM STRENGTH</span><span>FORCE USA</span>
   </div>
 </section>
+
+<div id="bestSellerSection" style="padding:0 24px 20px;"></div>
 
 <section class="stats-section">
   <div class="kpi-grid">
@@ -413,49 +414,47 @@
   ];
 
   const muscleGroups = [
-    { key:'pecho', name:'Pecho' },
-    { key:'espalda', name:'Espalda' },
-    { key:'piernas', name:'Piernas' },
-    { key:'hombro', name:'Hombro' },
-    { key:'brazos', name:'Brazos' },
-    { key:'core', name:'Core' }
+    { key:'Pecho', name:'Pecho' },
+    { key:'Espalda', name:'Espalda' },
+    { key:'Piernas', name:'Piernas' },
+    { key:'Hombro', name:'Hombro' },
+    { key:'Brazos', name:'Brazos' },
+    { key:'Core', name:'Core' }
   ];
 
-  const newArrivalsByGroup = {
-    pecho: [
-      { brand:'Panatta', model:'Chest Press FreeWeight', price:'2.250 €', daysAgo:'2 días' },
-      { brand:'Matrix', model:'Chest Press Ultra G7', price:'2.480 €', daysAgo:'5 días' },
-      { brand:'Life Fitness', model:'Signature Chest Press', price:'2.690 €', daysAgo:'1 semana' }
-    ],
-    espalda: [
-      { brand:'Matrix', model:'Jalón al pecho G7', price:'2.100 €', daysAgo:'3 días' },
-      { brand:'Binom Fitness', model:'Lat Pulldown Pro', price:'1.780 €', daysAgo:'6 días' },
-      { brand:'Akon', model:'Remo sentado AK-500', price:'1.650 €', daysAgo:'1 semana' }
-    ],
-    piernas: [
-      { brand:'Panatta', model:'Prensa 45º FreeWeight', price:'3.200 €', daysAgo:'1 día' },
-      { brand:'Etenon', model:'Leg Curl ET-300', price:'1.590 €', daysAgo:'4 días' },
-      { brand:'Life Fitness', model:'Leg Extension Signature', price:'2.400 €', daysAgo:'1 semana' }
-    ],
-    hombro: [
-      { brand:'Matrix', model:'Shoulder Press G7', price:'2.050 €', daysAgo:'3 días' },
-      { brand:'Akon', model:'Press militar AK-210', price:'1.480 €', daysAgo:'5 días' },
-      { brand:'Panatta', model:'Lateral Raise FreeWeight', price:'1.920 €', daysAgo:'2 semanas' }
-    ],
-    brazos: [
-      { brand:'Binom Fitness', model:'Bíceps/Tríceps Combo', price:'1.550 €', daysAgo:'2 días' },
-      { brand:'Etenon', model:'Cable Crossover ET-410', price:'2.780 €', daysAgo:'1 semana' },
-      { brand:'Matrix', model:'Triceps Extension G7', price:'1.890 €', daysAgo:'2 semanas' }
-    ],
-    core: [
-      { brand:'Panatta', model:'Abdominal Crunch FreeWeight', price:'1.690 €', daysAgo:'4 días' },
-      { brand:'Life Fitness', model:'Torso Rotation Signature', price:'2.150 €', daysAgo:'1 semana' },
-      { brand:'Akon', model:'Rotary Torso AK-330', price:'1.420 €', daysAgo:'2 semanas' }
-    ]
-  };
+  function daysAgoLabel(dateStr){
+    if (!dateStr) return '';
+    const then = new Date(dateStr);
+    if (isNaN(then)) return '';
+    const diffDays = Math.max(0, Math.round((Date.now() - then.getTime()) / 86400000));
+    if (diffDays === 0) return 'hoy';
+    if (diffDays === 1) return '1 día';
+    if (diffDays < 7) return diffDays + ' días';
+    const weeks = Math.round(diffDays / 7);
+    return weeks === 1 ? '1 semana' : weeks + ' semanas';
+  }
+
+  function buildNewArrivalsByGroup(byType){
+    const grouped = {};
+    muscleGroups.forEach(mg => { grouped[mg.key] = []; });
+    Object.values(byType).flat().forEach(p => {
+      if (p.muscleGroup && grouped.hasOwnProperty(p.muscleGroup)) {
+        grouped[p.muscleGroup].push(p);
+      }
+    });
+    Object.keys(grouped).forEach(key => {
+      grouped[key] = grouped[key]
+        .slice()
+        .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+        .slice(0, 3);
+    });
+    return grouped;
+  }
+
+  let newArrivalsByGroup = buildNewArrivalsByGroup(productsByType);
 
   const ACCENT = '#ff5a36';
-  let selectedMuscle = 'pecho';
+  let selectedMuscle = 'Piernas';
 
   // ---------- RENDER: top ventas ----------
   function renderTopSellers(){
@@ -499,20 +498,29 @@
   function renderArrivals(){
     const el = document.getElementById('arrivalsGrid');
     const list = newArrivalsByGroup[selectedMuscle] || [];
-    el.innerHTML = list.map(n => `
+    if (list.length === 0) {
+      el.innerHTML = `<p style="grid-column:1/-1;font-size:13.5px;color:var(--muted);">Todavía no hay novedades en esta categoría.</p>`;
+      return;
+    }
+    el.innerHTML = list.map(n => {
+      const thumbContent = n.photo
+        ? `<img src="${n.photo}" alt="${n.brand} ${n.model}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:10px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+        : '<span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span>';
+      return `
       <div class="arrival-card">
         <div class="new-badge">NUEVO</div>
-        <div class="thumb"><span style="font-size:10px;font-weight:600;color:#a3a3a3;">FOTO</span></div>
+        <div class="thumb" style="overflow:hidden;">${thumbContent}</div>
         <div>
           <div style="font-size:14.5px;font-weight:700;">${n.brand}</div>
           <div style="font-size:12.5px;color:#7a7a7a;">${n.model}</div>
         </div>
         <div class="arrival-price-row">
-          <span style="font-size:17px;font-weight:800;">${n.price}</span>
-          <span style="font-size:11px;color:#9a9a9a;">Hace ${n.daysAgo}</span>
+          <span style="font-size:17px;font-weight:800;">${n.price.toLocaleString('es-ES')} €</span>
+          <span style="font-size:11px;color:#9a9a9a;">Hace ${daysAgoLabel(n.dateAdded)}</span>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
   function selectMuscle(key){
     selectedMuscle = key;
@@ -708,7 +716,10 @@
           power: (row.Potencia || '').trim(),
           maxSpeed: (row.VelocidadMax || '').trim(),
           incline: (row.Inclinacion || '').trim(),
-          badge: (row.Destacado || '').trim()
+          badge: (row.Destacado || '').trim(),
+          muscleGroup: (row.GrupoMuscular || '').trim(),
+          dateAdded: (row.FechaAlta || '').trim(),
+          isBestSeller: ['sí','si','true','1','x'].includes((row.MasVendidoDelMes || '').trim().toLowerCase())
         });
       });
       if (Object.keys(byType).length === 0) return null;
@@ -776,6 +787,31 @@
     marcaSelect.innerHTML = '<option>Todas</option>' + marcas.map(m => `<option>${m}</option>`).join('');
   }
 
+  function findBestSeller(byType){
+    return Object.values(byType).flat().find(p => p.isBestSeller) || null;
+  }
+
+  function renderBestSellerOfMonth(product){
+    const section = document.getElementById('bestSellerSection');
+    if (!product) { section.innerHTML = ''; return; }
+    const thumbContent = product.photo
+      ? `<img src="${product.photo}" alt="${product.brand} ${product.model}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:11px;font-weight:600;color:#a3a3a3;&quot;>FOTO</span>'">`
+      : '<span style="font-size:11px;font-weight:600;color:#a3a3a3;">FOTO</span>';
+    section.innerHTML = `
+      <div class="wrap">
+        <div style="background:#111214;border-radius:20px;padding:26px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+          <div style="width:96px;height:96px;border-radius:14px;background:#1c1f22;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${thumbContent}</div>
+          <div style="flex:1;min-width:200px;">
+            <span style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;">🔥 Producto más vendido del mes</span>
+            <div style="font-size:20px;font-weight:800;color:#fff;margin-top:4px;">${product.brand} — ${product.model}</div>
+            <div style="font-size:14px;color:#9a9a9a;margin-top:2px;">${product.price.toLocaleString('es-ES')} € · Entrega ${product.delivery}</div>
+          </div>
+          <button class="btn-accent" onclick="openModal('${product.brand} ${product.model}')">Obtener descuento</button>
+        </div>
+      </div>
+    `;
+  }
+
   // ---------- INIT ----------
   (async function init(){
     const fromSheet = await loadCatalogFromSheet();
@@ -783,9 +819,11 @@
       productsByType = fromSheet;
       bestRated = bestRatedFromCatalog(productsByType);
     }
+    newArrivalsByGroup = buildNewArrivalsByGroup(productsByType);
     populateFilterOptions();
     renderTopSellers();
     renderBestRated();
+    renderBestSellerOfMonth(findBestSeller(productsByType));
     renderMuscleChips();
     renderArrivals();
     applyFilters();
