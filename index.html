@@ -155,13 +155,12 @@
   /* Selector de idioma (Google Translate) */
   .goog-te-banner-frame{ display:none !important; }
   body{ top:0 !important; }
-  #google_translate_element .goog-te-gadget{ font-family:'Poppins',sans-serif !important; font-size:0 !important; }
-  #google_translate_element .goog-te-gadget-simple{
-    border:1.5px solid #e2e2e2 !important; border-radius:8px !important; padding:7px 10px !important;
-    background:#fff !important; display:inline-flex !important; align-items:center !important;
+  /* El widget real de Google Translate se oculta del todo: usamos nuestro propio selector */
+  #google_translate_element{ display:none !important; }
+  .lang-switcher{
+    padding:8px 12px; border-radius:8px; border:1.5px solid #e2e2e2; background:#fff;
+    font-family:'Poppins',sans-serif; font-size:13px; color:var(--text); cursor:pointer;
   }
-  #google_translate_element .goog-te-gadget-simple span{ font-size:13px !important; color:var(--text) !important; }
-  #google_translate_element img{ display:none !important; }
 
   @media (max-width:900px){
     header,.hero,.stats-section,.novedades,.comparador,.calc-section,footer{padding-left:20px;padding-right:20px;}
@@ -183,7 +182,13 @@
     <a href="#comparador">Marcas</a>
     <a href="#calculadora">Cómo funciona</a>
     <a href="#novedades">Opiniones</a>
-    <div id="google_translate_element" style="display:inline-block;"></div>
+    <select id="langSelect" class="lang-switcher" onchange="switchLanguage(this.value)">
+      <option value="es">🇪🇸 Español</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="fr">🇫🇷 Français</option>
+    </select>
+    <div id="google_translate_element"></div>
     <button class="btn-outline">Soy distribuidor</button>
   </nav>
 </header>
@@ -195,13 +200,36 @@
       'google_translate_element'
     );
   }
+
+  function getCookie(name){
+    const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? match.pop() : '';
+  }
+
+  function switchLanguage(lang){
+    if (lang === 'es') {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+    } else {
+      document.cookie = 'googtrans=/es/' + lang + '; path=/;';
+      document.cookie = 'googtrans=/es/' + lang + '; path=/; domain=' + location.hostname;
+    }
+    window.location.reload();
+  }
+
+  // Deja el desplegable en el idioma actualmente activo al cargar la página
+  (function initLangSelect(){
+    const current = getCookie('googtrans');
+    const match = current && current.match(/\/es\/(\w+)/);
+    if (match) document.getElementById('langSelect').value = match[1];
+  })();
 </script>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <section class="hero">
   <div class="badge">Comparador oficial de equipamiento para gimnasios en España</div>
   <h1>Descubre cuánto cuesta montar tu gimnasio</h1>
-  <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos.</p>
+  <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos. Ofertas y descuentos únicos de BazarFitness, directos de fábrica.</p>
   <div class="brands">
     <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span><span>TITANIUM STRENGTH</span><span>FORCE USA</span>
   </div>
