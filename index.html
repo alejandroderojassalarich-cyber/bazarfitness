@@ -227,9 +227,9 @@
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <section class="hero">
-  <div class="badge">Comparador oficial de equipamiento para gimnasios en Europa</div>
+  <div class="badge">Comparador oficial de equipamiento para gimnasios en España</div>
   <h1>Descubre cuánto cuesta montar tu gimnasio</h1>
-  <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos. Ofertas y descuentos únicos del 10%, 20% y hasta el 50% gracias a BazarFitness.</p>
+  <p>Compara precios reales de Matrix, Panatta, Life Fitness y otras marcas líderes, y recibe una propuesta a medida en minutos. Ofertas y descuentos únicos de BazarFitness, directos de fábrica.</p>
   <div class="brands">
     <span>MATRIX</span><span>PANATTA</span><span>LIFE FITNESS</span><span>BINOM FITNESS</span><span>AKON</span><span>ETENON</span><span>TITANIUM STRENGTH</span><span>FORCE USA</span>
   </div>
@@ -799,8 +799,10 @@
     document.getElementById('modalOverlay').classList.remove('open');
   }
 
-  // Reemplaza TU_FORMSPREE_ID por el ID real que te da formspree.io al crear tu formulario.
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/TU_FORMSPREE_ID';
+  // FormSubmit: no requiere cuenta, envía directo a este correo.
+  // OJO: la primera vez que llegue un envío, Gmail recibirá un correo de "activate form" de FormSubmit
+  // que hay que confirmar (clic en el enlace) para que empiecen a llegar los siguientes de verdad.
+  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/alejandro.derojas.salarich@gmail.com';
 
   async function submitLead(e){
     e.preventDefault();
@@ -808,12 +810,15 @@
     const btn = document.getElementById('modalSubmitBtn');
     const formData = new FormData(form);
     formData.append('propuesta', document.getElementById('modalTitle').textContent);
+    formData.append('_subject', 'Nuevo lead BazarFitness: ' + document.getElementById('modalTitle').textContent);
+    formData.append('_template', 'table');
+    formData.append('_captcha', 'false');
 
     btn.disabled = true;
     btn.textContent = 'Enviando...';
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch(FORM_ENDPOINT, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
         body: formData
@@ -862,7 +867,7 @@
         <div style="background:#111214;border-radius:20px;padding:26px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
           <div style="width:96px;height:96px;border-radius:14px;background:#1c1f22;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">${thumbContent}</div>
           <div style="flex:1;min-width:200px;">
-            <span style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;"> Producto más vendido del mes</span>
+            <span style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;">🔥 Producto más vendido del mes</span>
             <div style="font-size:20px;font-weight:800;color:#fff;margin-top:4px;">${product.brand} — ${product.model}</div>
             <div style="font-size:14px;color:#9a9a9a;margin-top:2px;">${formatEuro(product.price)} € · Entrega ${product.delivery}</div>
           </div>
